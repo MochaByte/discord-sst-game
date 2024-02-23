@@ -4,71 +4,42 @@ import { CLIENT_ID, GUILD_ID, TOKEN } from "./config/config";
 
 const commands = [
   {
-    name: "short",
-    description: "Place a short trade you dirty bear.",
+    name: "attack",
+    description: "Attack the CEX bugs and destroy their hive.",
     options: [
       {
-        name: "market",
-        description: "Select the market for the trade",
+        name: "choose_weapon",
+        description: "choose one to kill these sons of b$?*#s ",
         type: 3,
         required: true,
         choices: [
-          { name: "BTC", value: "BTC" },
-          { name: "ETH", value: "ETH" },
-          { name: "LINK", value: "LINK" },
-          { name: "PEPE", value: "PEPE" },
-          { name: "SNX", value: "SNX" },
-          { name: "KWENTA", value: "KWENTA" },
-        ],
-      },
-      {
-        name: "leverage",
-        description: "Select the leverage for the trade",
-        type: 3,
-        required: true,
-        choices: [
-          { name: "x5", value: "x5" },
-          { name: "x10", value: "x10" },
-          { name: "x100", value: "x100" },
-          { name: "x1000", value: "x1000" },
-          { name: "none", value: "none" },
+          { name: "AssultRifle", value: "AssultRifle" },
+          { name: "Gun", value: "Gun" },
+          { name: "Blaster", value: "Blaster" },
+          { name: "Stick", value: "Stick" },
         ],
       },
     ],
   },
   {
-    name: "long",
-    description: "Place a long you bullah.",
+    name: "defend",
+    description: "Defend Infinex HQ from CEX bugs.",
     options: [
       {
-        name: "market",
-        description: "Select the market for the trade",
+        name: "choose_action",
+        description: "choose defend method",
         type: 3,
         required: true,
         choices: [
-          { name: "BTC", value: "BTC" },
-          { name: "ETH", value: "ETH" },
-          { name: "LINK", value: "LINK" },
-          { name: "PEPE", value: "PEPE" },
-          { name: "SNX", value: "SNX" },
-          { name: "KWENTA", value: "KWENTA" },
-        ],
-      },
-      {
-        name: "leverage",
-        description: "Select the leverage for the trade",
-        type: 3,
-        required: true,
-        choices: [
-          { name: "x5", value: "x5" },
-          { name: "x10", value: "x10" },
-          { name: "x100", value: "x100" },
-          { name: "x1000", value: "x1000" },
-          { name: "none", value: "none" },
+          { name: "Attack", value: "Attack" },
+          { name: "BuildWall", value: "BuildWall" },
+          { name: "SupplyRun", value: "SupplyRun" },
+          { name: "Snacking", value: "Snacking" },
         ],
       },
     ],
   },
+  
   {
     name: "leaderboard",
     description: "Displays the leaderboard of top users",

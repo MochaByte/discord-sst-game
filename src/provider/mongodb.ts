@@ -1,93 +1,91 @@
 import { MongoClient } from "mongodb";
 import { MONGO_SECRET, MONGO_URL, MONGO_USER } from "../config/config";
-import { LeaderBoard } from "../types";
+// import { Trooper } from "../types"; 
 
 const mongoUri = `mongodb+srv://${MONGO_USER}:${MONGO_SECRET}${MONGO_URL}`;
-const db = "trading-game";
-const collectionName = "kwenta";
+const db = "starshipTroopersGame"; // Updated to match the theme
+const collectionName = "troopers"; // Updated to reflect Starship Troopers theme
 
-export async function getLeaderBoard(): Promise<LeaderBoard[] | undefined> {
-  console.log("RETRIEVING LEADERBOARD");
-  const client = new MongoClient(mongoUri);
-
-  try {
-    await client.connect();
-    const collection = client.db(db).collection(collectionName);
-    const leaderboard = (await collection
-      .find()
-      .sort({ points: -1 })
-      .toArray()) as any as LeaderBoard[];
-    return leaderboard;
-  } catch (error) {
-    console.error("getTradeError: ", error);
-  } finally {
-    await client.close();
-  }
+interface Trooper {
+  userId: string;
+  points: number;
+  // rank: number; // Optional for now, will be calculated on leaderboard retrieval
 }
 
-export async function getTrader(userId: string) {
-  console.log("RETRIEVING Trader", userId);
+
+export async function getLeaderBoard(): Promise<Trooper[]> {
   const client = new MongoClient(mongoUri);
-  try {
-    await client.connect();
-    const collection = client.db(db).collection(collectionName);
+  await client.connect();
+  const collection = client.db(db).collection(collectionName);
+  const documents = await collection.find().sort({ points: -1 }).toArray();
+  const leaderboard: Trooper[] = documents.map(doc => ({
+    userId: doc.userId,
+    points: doc.points,
+    rank: doc.rank // Assuming 'rank' is stored in the document; if not, it will be undefined
+  }));
+  await client.close();
+  return leaderboard;
+}
 
-    // Check if user already exists
-    const docs = (await collection
-      .find({ userId: userId })
-      .limit(1)
-      .toArray()) as any as LeaderBoard[];
+export async function getTrooper(userId: string): Promise<Trooper | undefined> {
+  const client = new MongoClient(mongoUri);
+  await client.connect();
+  const collection = client.db(db).collection(collectionName);
+  const document = await collection.findOne({ userId: userId });
+  if (!document) return undefined;
+  const trooper: Trooper = {
+    userId: document.userId,
+    points: document.points,
+    // rank: document.rank // Assuming 'rank' is stored in the document; if not, it will be undefined
+  };
+  await client.close();
+  return trooper;
+}
 
-    if (docs?.length) {
-      return docs[0];
-    } else {
-      return {
-        userId: userId,
-        points: 0,
-      };
+export async function upsertTrooper(data: Trooper): Promise<void> {
+  const client = new MongoClient(mongoUri);
+  await client.connect();
+  const collection = client.db(db).collection(collectionName);
+  await collection.updateOne(
+    { userId: data.userId },
+    { $set: data },
+    { upsert: true }
+  );
+  console.log(`Trooper updated: ${data.userId}`);
+  await client.close();
+}
+
+export async function updateAndFetchRanks(): Promise<Trooper[]> {
+  const client = new MongoClient(mongoUri);
+  await client.connect();
+  const collection = client.db(db).collection(collectionName);
+
+  // Fetch all troopers and sort them by points in descending order
+  const troopers = await collection.find().sort({ points: -1 }).toArray() as unknown as Trooper[];
+
+  // Prepare bulk operations for rank updates
+  const bulkOps = troopers.map((trooper, index) => ({
+    updateOne: {
+      filter: { userId: trooper.userId },
+      update: { $set: { rank: index + 1 } }
     }
-  } catch (error) {
-    console.error("Error: ", error);
-  } finally {
-    await client.close();
+  }));
+
+  // Execute bulk operations if there are any
+  if (bulkOps.length > 0) {
+    await collection.bulkWrite(bulkOps);
   }
+
+  await client.close();
+  return troopers; // Note: This returns troopers with their new ranks as calculated, but does not re-fetch from the database
 }
 
-export async function insertTrader(data: LeaderBoard) {
-  console.log("INSERTING Trader", data);
 
+export async function insertOrUpdatePlayer(trooper: Trooper): Promise<void> {
   const client = new MongoClient(mongoUri);
-  try {
-    await client.connect();
-    const collection = client.db(db).collection(collectionName);
-
-    // Check if user already exists
-    const docs = await collection
-      .find({ userId: data.userId })
-      .limit(1)
-      .toArray();
-
-    if (!docs?.length) {
-      await collection.insertOne({
-        ...data,
-      });
-      console.log(
-        `Successfully inserted ${data.userId} user with ${data.points} points.`
-      );
-      return data;
-    } else {
-      await collection.updateOne(
-        { _id: docs[0]?._id },
-        { $set: { points: data.points } }
-      );
-      console.log(
-        `Successfully updated ${data.userId} user with ${data.points} points.`
-      );
-      return { ...docs[0], ...data };
-    }
-  } catch (error) {
-    console.error("Error: ", error);
-  } finally {
-    await client.close();
-  }
+  await client.connect();
+  const collection = client.db(db).collection(collectionName);
+  await collection.updateOne({ userId: trooper.userId }, { $set: trooper }, { upsert: true });
+  await client.close();
 }
+
