@@ -19,6 +19,18 @@ const commands = [
           { name: "Stick", value: "Stick" },
         ],
       },
+      {
+        name: "power-level",
+        description: "Set the power level for your attack (higher risk but higher reward).",
+        type: 4, // Type 4 for an integer
+        required: false,
+        choices: [
+          { name: "1x", value: 1 },
+          { name: "5x", value: 5 },
+          { name: "10x", value: 10 },
+          { name: "100x", value: 100 },
+        ],
+      },
     ],
   },
   {
@@ -37,6 +49,18 @@ const commands = [
           { name: "Snacking", value: "Snacking" },
         ],
       },
+      {
+        name: "power-level",
+        description: "Set the power level for your defence (higher risk but higher reward).",
+        type: 4, // Type 4 for an integer
+        required: false,
+        choices: [
+          { name: "1x", value: 1 },
+          { name: "5x", value: 5 },
+          { name: "10x", value: 10 },
+          { name: "100x", value: 100 },
+        ],
+      },
     ],
   },
   
@@ -48,6 +72,25 @@ const commands = [
     name: "help",
     description: "Shows the manual and instructions for using the bot.",
   },
+ {
+  name: "wormhole",
+  description: "Travel through a wormhole to another territory.",
+  options: [
+    {
+      name: "destination",
+      description: "The destination territory",
+      type: 3,
+      required: true,
+      choices: [
+        { name: "Ethereum", value: "ethereum" },
+        { name: "Optimism", value: "optimism" },
+        { name: "Base", value: "base" },
+        { name: "Testnet", value: "testnet" },
+      ],
+    },
+  ],
+},
+  
 ];
 
 const rest = new REST({ version: "9" }).setToken(TOKEN);

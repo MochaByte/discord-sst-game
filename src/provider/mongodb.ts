@@ -9,6 +9,7 @@ const collectionName = "troopers"; // Updated to reflect Starship Troopers theme
 interface Trooper {
   userId: string;
   points: number;
+  currentTerritory?: string;
   // rank: number; // Optional for now, will be calculated on leaderboard retrieval
 }
 
@@ -18,13 +19,12 @@ export async function getLeaderBoard(): Promise<Trooper[]> {
   await client.connect();
   const collection = client.db(db).collection(collectionName);
   const documents = await collection.find().sort({ points: -1 }).toArray();
-  const leaderboard: Trooper[] = documents.map(doc => ({
+  await client.close();
+  return documents.map(doc => ({
     userId: doc.userId,
     points: doc.points,
-    rank: doc.rank // Assuming 'rank' is stored in the document; if not, it will be undefined
-  }));
-  await client.close();
-  return leaderboard;
+    currentTerritory: doc.currentTerritory, // Include currentTerritory in the mapping
+  })) as Trooper[];
 }
 
 export async function getTrooper(userId: string): Promise<Trooper | undefined> {
@@ -32,26 +32,31 @@ export async function getTrooper(userId: string): Promise<Trooper | undefined> {
   await client.connect();
   const collection = client.db(db).collection(collectionName);
   const document = await collection.findOne({ userId: userId });
+  await client.close();
   if (!document) return undefined;
-  const trooper: Trooper = {
+  return {
     userId: document.userId,
     points: document.points,
-    // rank: document.rank // Assuming 'rank' is stored in the document; if not, it will be undefined
-  };
-  await client.close();
-  return trooper;
+    currentTerritory: document.currentTerritory, // Include currentTerritory
+  } as Trooper;
 }
 
 export async function upsertTrooper(data: Trooper): Promise<void> {
   const client = new MongoClient(mongoUri);
   await client.connect();
   const collection = client.db(db).collection(collectionName);
-  await collection.updateOne(
-    { userId: data.userId },
-    { $set: data },
-    { upsert: true }
-  );
+  await collection.updateOne({ userId: data.userId }, { $set: data }, { upsert: true });
   console.log(`Trooper updated: ${data.userId}`);
+  await client.close();
+}
+
+// New function to update a trooper's current territory
+export async function updatePlayerTerritory(userId: string, territory: string): Promise<void> {
+  const client = new MongoClient(mongoUri);
+  await client.connect();
+  const collection = client.db(db).collection(collectionName);
+  await collection.updateOne({ userId: userId }, { $set: { currentTerritory: territory } }, { upsert: true });
+  console.log(`Trooper territory updated: ${userId} to ${territory}`);
   await client.close();
 }
 
@@ -79,7 +84,6 @@ export async function updateAndFetchRanks(): Promise<Trooper[]> {
   await client.close();
   return troopers; // Note: This returns troopers with their new ranks as calculated, but does not re-fetch from the database
 }
-
 
 export async function insertOrUpdatePlayer(trooper: Trooper): Promise<void> {
   const client = new MongoClient(mongoUri);
