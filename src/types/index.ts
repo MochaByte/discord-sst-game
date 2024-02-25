@@ -1,10 +1,11 @@
-export type Trooper = {
+export interface Trooper {
   userId: string;
   points: number;
-  rank: number; // Optional rank property
-};
+  currentTerritory: string; // Add this line
+}
 
 export type LeaderBoard = {
   userId: string;
   points: number;
+  territory: string;
 };

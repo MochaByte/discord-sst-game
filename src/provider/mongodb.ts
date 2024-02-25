@@ -1,17 +1,16 @@
 import { MongoClient } from "mongodb";
 import { MONGO_SECRET, MONGO_URL, MONGO_USER } from "../config/config";
-// import { Trooper } from "../types"; 
+import { Trooper } from "../types/index"; 
 
 const mongoUri = `mongodb+srv://${MONGO_USER}:${MONGO_SECRET}${MONGO_URL}`;
 const db = "starshipTroopersGame"; // Updated to match the theme
 const collectionName = "troopers"; // Updated to reflect Starship Troopers theme
 
-interface Trooper {
-  userId: string;
-  points: number;
-  currentTerritory?: string;
-  // rank: number; // Optional for now, will be calculated on leaderboard retrieval
-}
+// interface Trooper {
+//   userId: string;
+//   points: number;
+//   currentTerritory: string;
+// }
 
 
 export async function getLeaderBoard(): Promise<Trooper[]> {
@@ -51,14 +50,14 @@ export async function upsertTrooper(data: Trooper): Promise<void> {
 }
 
 // New function to update a trooper's current territory
-export async function updatePlayerTerritory(userId: string, territory: string): Promise<void> {
-  const client = new MongoClient(mongoUri);
-  await client.connect();
-  const collection = client.db(db).collection(collectionName);
-  await collection.updateOne({ userId: userId }, { $set: { currentTerritory: territory } }, { upsert: true });
-  console.log(`Trooper territory updated: ${userId} to ${territory}`);
-  await client.close();
-}
+// export async function updatePlayerTerritory(userId: string, territory: string): Promise<void> {
+//   const client = new MongoClient(mongoUri);
+//   await client.connect();
+//   const collection = client.db(db).collection(collectionName);
+//   await collection.updateOne({ userId: userId }, { $set: { currentTerritory: territory } }, { upsert: true });
+//   console.log(`Trooper territory updated: ${userId} to ${territory}`);
+//   await client.close();
+// }
 
 export async function updateAndFetchRanks(): Promise<Trooper[]> {
   const client = new MongoClient(mongoUri);

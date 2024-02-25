@@ -72,6 +72,10 @@ const commands = [
     name: "help",
     description: "Shows the manual and instructions for using the bot.",
   },
+  {
+    name: "points",
+    description: "Displays your current points and territory."
+  },
  {
   name: "wormhole",
   description: "Travel through a wormhole to another territory.",
@@ -82,10 +86,10 @@ const commands = [
       type: 3,
       required: true,
       choices: [
-        { name: "Ethereum", value: "ethereum" },
-        { name: "Optimism", value: "optimism" },
-        { name: "Base", value: "base" },
-        { name: "Testnet", value: "testnet" },
+        { name: "Ethereum", value: "Ethereum" },
+        { name: "Optimism", value: "Optimism" },
+        { name: "Base", value: "Base" },
+        { name: "Testnet", value: "Testnet" },
       ],
     },
   ],
