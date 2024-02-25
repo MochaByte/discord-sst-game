@@ -246,22 +246,46 @@ async function updateLeaderboardMessage(client: Client) {
 
 // Calculates the success change with the choosen powerLevel
 function getSuccessChance(powerLevel: number, territory: string): number {
-  switch (powerLevel) {
-    case 1: return 0.95; // High chance of success with default power
-    case 10: return 0.75; // Medium chance of success with moderate power
-    case 100: return 0.5; // Low chance of success with high power
-    default: return 0.95; // Default high chance for unspecified power levels
+  let successChance: number;
+  switch (territory) {
+    case 'Testnet':
+      successChance = powerLevel === 100 ? 0.5 : powerLevel === 10 ? 0.75 : 0.95;
+      break;
+    case 'Base':
+      successChance = powerLevel === 100 ? 0.45 : powerLevel === 10 ? 0.70 : 0.90;
+      break;
+    case 'Optimism':
+      successChance = powerLevel === 100 ? 0.40 : powerLevel === 10 ? 0.65 : 0.85;
+      break;
+    case 'Ethereum':
+      successChance = powerLevel === 100 ? 0.30 : powerLevel === 10 ? 0.50 : 0.80;
+      break;
+    default:
+      successChance = 0.95;
   }
+  return successChance;
 }
 
+
 function calculatePoints(powerLevel: number, territory: string): number {
-  if (powerLevel === 100) {
-    return 500; // High points for high power (leverage)
-  } else if (powerLevel === 10) {
-    return 200; // Moderate points for moderate power
-  } else {
-    return 100; // Default points for default power
+  let points: number;
+  switch (territory) {
+    case 'Testnet':
+      points = powerLevel === 100 ? 500 : powerLevel === 10 ? 200 : 100;
+      break;
+    case 'Base':
+      points = powerLevel === 100 ? 1000 : powerLevel === 10 ? 400 : 200;
+      break;
+    case 'Optimism':
+      points = powerLevel === 100 ? 2000 : powerLevel === 10 ? 800 : 400;
+      break;
+    case 'Ethereum':
+      points = powerLevel === 100 ? 4000 : powerLevel === 10 ? 1500 : 800;
+      break;
+    default:
+      points = 100; 
   }
+  return points;
 }
 
 async function handleWormholeCommand(interaction: CommandInteraction) {
@@ -281,13 +305,13 @@ async function handleWormholeCommand(interaction: CommandInteraction) {
 
 function getFallbackTerritory(currentTerritory: string): string {
   // Logic to determine the fallback territory if a user "dies"
-  const territoryOrder = ['Ethereum', 'Optimism', 'Base', 'Testnet'];
+  const territoryOrder = ['Testnet', 'Base', 'Optimism','Ethereum'];
   const currentIndex = territoryOrder.indexOf(currentTerritory);
   return currentIndex > 0 ? territoryOrder[currentIndex - 1] : 'Testnet';
 }
 
 async function updatePlayerTerritory(userId: string, currentPoints: number, newTerritory: string) {
-  // Define gas fees with explicit typing to help TypeScript understand the indexing
+  //Gas fees to switch territories:
   const gasFees: { [key: string]: number } = { 'Testnet': 0,'Base': 1000, 'Optimism': 10000, 'Ethereum': 100000 };
   const fee = gasFees[newTerritory]; // Now TypeScript knows newTerritory is a valid key
   console.log(newTerritory);
