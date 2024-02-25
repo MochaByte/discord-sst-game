@@ -94,13 +94,34 @@ export async function Run(): Promise<void> {
       // UPDATE Switch/case for all the commands
       switch (commandName) {
         case "help":
-          await interaction.reply(`**Commands:**
-          \n- \`/attack\`: Attack the bugs to earn CEX Destruction Points.
-          \n-  \`/defend\`: Defend your base from the bugs for decentralized freedom.
-          \n-  \`/leaderboard\`: Show the leaderboard of top players.
-          \n-  \`/wormhole\`: Travel through a wormhole to another territory and defend the CEX.
-          \n- \`/points\`: Shows your current Points and your current Territory`);
+          await interaction.reply({content:`
+          **Commands:**
+          \n- \`/attack\`: Launch an attack against the CEX bugs to earn points. Your success and the points you earn depend on your chosen power level and your current territory.
+          \n-  \`/defend\`: Defend your current territory from incoming bugs. Like attacks, your success depends on your power level and territory.
+          \n-  \`/leaderboard\`: Displays the top Infinex Troopers, their points, and territories.
+          \n-  \`/wormhole\`: Travel to another CEX territory. Requires paying gas fees in points.
+          \n- \`/points\`: Displays your current points, territory, and other player stats.`, ephemeral: true} );
           break;
+        case "howtoplay":
+            await interaction.reply({content:`
+            **How to play:**
+            \nWelcome to Infinex Troopers!
+            \nIn a universe where decentralized exchanges (DEXs) battle for supremacy against centralized exchanges (CEXs), you are an Infinex Trooper, defending the realm of decentralized finance against the invasive CEX bugs. Your mission: secure the blockchain territories, earn points, and rise through the ranks of Infinex Troopers.
+            \n**Territories Explained:**
+            \n- Testnet: Your training ground. Lower risk but also lower rewards.
+            \n- Base: The frontline of defense. A step up from Testnet with better rewards.
+            \n- Optimism: A strategic stronghold. Higher risk, but the rewards are significantly greater.
+            \n- Ethereum: The heart of the blockchain. The highest risk but offers the most lucrative rewards.
+            \n**Moving Between Territories:**
+            \n- Use \`/wormhole\` to travel between territories. Each move requires paying gas fees in points, with higher territories costing more.
+            \n- Success in a higher territory earns you more points, but failure could mean falling back to a lower territory or losing a significant portion of your points in Testnet.
+            \n**Gameplay Tips:**
+            \n- Start in Testnet to get the hang of the game with lower risk.
+            \n- Consider the risk vs. reward of moving to a higher territory. Higher territories offer more points but come with a greater risk of falling back.
+            \n- Keep an eye on the leaderboard to see how you stack up against other players.
+            \n- Join the battle, protect the blockchain, and may the best Trooper win!`, ephemeral: true});
+
+            break;
         case "attack":
         case "defend":
           await handleCombatCommand(interaction, commandName);
@@ -115,7 +136,7 @@ export async function Run(): Promise<void> {
           await handleWormholeCommand(interaction);
           break;
         default:
-          await interaction.reply("Unknown command. Use `/help` to see all commands.");
+          await interaction.reply({content: "Unknown command. Use `/help` to see all commands.", ephemeral: true});
           break;
       }
       // Update the leaderboard in the leaderboard channel

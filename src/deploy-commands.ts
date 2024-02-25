@@ -73,6 +73,10 @@ const commands = [
     description: "Shows the manual and instructions for using the bot.",
   },
   {
+    name: "howtoplay",
+    description: "How to play the game and more information",
+  },
+  {
     name: "points",
     description: "Displays your current points and territory."
   },
