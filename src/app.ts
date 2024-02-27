@@ -163,29 +163,26 @@ async function handleCombatCommand(interaction: CommandInteraction, commandName:
     // Fetch the current trooper's status, including territory
   let trooper: Trooper = await getTrooper(userId) || { userId, points: 0, currentTerritory: 'Testnet' };
   const powerLevel = (interaction.options.get('power-level')?.value as number) || 1; // Default power is 1 if not specified, PowerLevel is basically like leverage
-  //const destination = (interaction.options.get('destination')?.value as string) || 'defaultTerritory';
 
  // Adjusting success chance and points change based on the territory and power level
  const successChance = getSuccessChance(powerLevel, trooper.currentTerritory);
  const isSuccessful = Math.random() < successChance;
- let pointsChange = isSuccessful ? calculatePoints(powerLevel, trooper.currentTerritory) : -calculatePoints(powerLevel, trooper.currentTerritory) / 2;
+ let pointsChange = isSuccessful ? calculatePoints(powerLevel, trooper.currentTerritory): 0;
  
  // If user dies in a territory higher than Testnet, downgrade territory
  if (!isSuccessful && trooper.currentTerritory !== 'Testnet') {
-   trooper.currentTerritory = getFallbackTerritory(trooper.currentTerritory);
-   interaction.followUp(`You have been defeated and fall back to the ${trooper.currentTerritory} territory.`);
+    trooper.currentTerritory = getFallbackTerritory(trooper.currentTerritory);
+    interaction.followUp(`You have been ${bold('DEFEATED')} and lost all your points. \nFall back to the ${bold(trooper.currentTerritory)} territory.`);
+    trooper.points = 0;
+    cooldowns.set(userId, Date.now() + 1000 * 60 * 60 * 4); // 4 hours in milliseconds - 4h cooldown
  } else if (!isSuccessful && trooper.currentTerritory === 'Testnet') {
-   // Lose half the points if died in Testnet
-   pointsChange = -trooper.points / 2;
-   cooldowns.set(userId, Date.now() + 10000); // 10-second cooldown
+    interaction.followUp(`You have been completely ${bold('DEFEATED')} and lost all your points!`);
+    trooper.points = 0;
+    cooldowns.set(userId, Date.now() + 1000 * 60 * 60 * 4); // 4 hours in milliseconds - 4h cooldown
  }
+ 
   //Updated points:
   trooper.points += pointsChange;
-
-  // Applying a cooldown if the user fails
-  if (!isSuccessful) {
-    cooldowns.set(userId, Date.now() + 10000); // 10-second cooldown
-  }
 
   await insertOrUpdatePlayer(trooper); // Update database
 
@@ -196,7 +193,7 @@ async function handleCombatCommand(interaction: CommandInteraction, commandName:
   const messagePrefix = isSuccessful ? "Attacking the CEX bugs" : "Defending base from CEX bugs";
   const successMessage = isSuccessful ? `was ${bold('successful')}, you'll live another day` : `failed, you ${bold('DIED')}`;
   const winOrLoseMessage = isSuccessful ?  `${bold('WIN')}` :  `${bold('LOSE')}`;
-  const pointsMessage = `You ${winOrLoseMessage}. ${pointsChange > 0 ? `${bold('+')}` : ''} ${bold(pointsChange + 'points')}`;
+  const pointsMessage = `You ${winOrLoseMessage}. ${pointsChange > 0 ? `${bold('+')}` : ''} ${bold(pointsChange + ' points')}`;
 
   const embed = new EmbedBuilder()
   .setTitle(`${messagePrefix} ${successMessage}!`)
@@ -324,13 +321,15 @@ async function handleWormholeCommand(interaction: CommandInteraction) {
   }
 }
 
+// Logic to determine the fallback territory if a user "dies"
 function getFallbackTerritory(currentTerritory: string): string {
-  // Logic to determine the fallback territory if a user "dies"
+ 
   const territoryOrder = ['Testnet', 'Base', 'Optimism','Ethereum'];
   const currentIndex = territoryOrder.indexOf(currentTerritory);
   return currentIndex > 0 ? territoryOrder[currentIndex - 1] : 'Testnet';
 }
 
+// Update the territory ith the wormhole command
 async function updatePlayerTerritory(userId: string, currentPoints: number, newTerritory: string) {
   //Gas fees to switch territories:
   const gasFees: { [key: string]: number } = { 'Testnet': 0,'Base': 1000, 'Optimism': 10000, 'Ethereum': 100000 };
@@ -338,7 +337,6 @@ async function updatePlayerTerritory(userId: string, currentPoints: number, newT
   console.log(newTerritory);
   console.log(gasFees);
   if (currentPoints >= fee) {
-    // Assuming insertOrUpdatePlayer can handle updating territory
     await insertOrUpdatePlayer({ userId, points: currentPoints - fee, currentTerritory: newTerritory });
     return true; // Territory update was successful
   } else {

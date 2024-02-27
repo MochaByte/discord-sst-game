@@ -23,7 +23,7 @@ const commands = [
         name: "power-level",
         description: "Set the power level for your attack (higher risk but higher reward).",
         type: 4, // Type 4 for an integer
-        required: false,
+        required: true,
         choices: [
           { name: "1x", value: 1 },
           { name: "5x", value: 5 },
@@ -53,7 +53,7 @@ const commands = [
         name: "power-level",
         description: "Set the power level for your defence (higher risk but higher reward).",
         type: 4, // Type 4 for an integer
-        required: false,
+        required: true,
         choices: [
           { name: "1x", value: 1 },
           { name: "5x", value: 5 },
