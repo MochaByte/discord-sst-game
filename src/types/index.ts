@@ -9,3 +9,8 @@ export type LeaderBoard = {
   points: number;
   territory: string;
 };
+
+export type Outcome = {
+  message: string;
+  gifUrl: string;
+};

@@ -8,7 +8,7 @@ const commands = [
     description: "Attack the CEX bugs and destroy their hive.",
     options: [
       {
-        name: "choose_weapon",
+        name: "choose_action",
         description: "choose one to kill these sons of b$?*#s ",
         type: 3,
         required: true,
